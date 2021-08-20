@@ -1,4 +1,4 @@
-# Feldspar
+# Feldspar [![CI status](https://github.com/dfreeman/feldspar/workflows/CI/badge.svg)](https://github.com/dfreeman/feldspar/actions?query=workflow%3ACI)
 
 This is a toy parser combinator system based off of the Racket GLL parser library described in [this article](https://epsil.github.io/gll/).
 
