@@ -1,4 +1,4 @@
-import { Continuation, State, success } from './parser/result';
+import { Continuation, ParseState, success } from './parser/result';
 
 export type CombinatorContents<T extends Combinator> = T extends Combinator<
   infer U
@@ -12,13 +12,17 @@ export type CombinatorTupleContents<T> = {
 
 export type Push = <T>(
   combinator: Combinator<T>,
-  state: State,
+  state: ParseState,
   continuation: Continuation<T>
 ) => void;
 
 export abstract class Combinator<T = any> {
   public abstract children(): ReadonlyArray<Combinator>;
-  public abstract parse(state: State, push: Push, cont: Continuation<T>): void;
+  public abstract parse(
+    state: ParseState,
+    push: Push,
+    cont: Continuation<T>
+  ): void;
 
   public map<U>(f: (value: T) => U): Combinator<U> {
     return new SimpleCombinator(
