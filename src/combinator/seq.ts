@@ -1,5 +1,5 @@
 import { Combinator, CombinatorTupleContents, Push } from '../combinator';
-import { Continuation, State, success } from '../parser/result';
+import { Continuation, ParseState, success } from '../parser/result';
 
 export const { seq } = class SeqCombinator<
   T extends Array<Combinator>
@@ -13,7 +13,7 @@ export const { seq } = class SeqCombinator<
   }
 
   public parse(
-    state: State,
+    state: ParseState,
     push: Push,
     cont: Continuation<CombinatorTupleContents<T>>,
     combinator = 0,

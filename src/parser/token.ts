@@ -1,16 +1,15 @@
-import { Continuation, failure, State, success } from './result';
+import { Continuation, failure, ParseState, success } from './result';
 import { Combinator, Push } from '../combinator';
 
 export type Matcher = (input: string, offset: number) => Token | undefined;
-export type TokenConfig =
-  | string
-  | RegExp
-  | {
-      pattern: string | RegExp;
-      kind?: string;
-      silent?: boolean;
-      priority?: number;
-    };
+export type TokenConfig = {
+  kind?: string;
+  silent?: boolean;
+  priority?: number;
+  requiredState?: TokenizerState;
+  pushState?: TokenizerState;
+  popState?: TokenizerState;
+};
 
 export interface Token {
   readonly kind: string;
@@ -18,34 +17,56 @@ export interface Token {
   readonly content: string;
 }
 
+export class TokenizerState {
+  public constructor(
+    public readonly name: string,
+    public readonly exclusive: boolean
+  ) {}
+}
+
+export function state(
+  name: string,
+  { exclusive = false } = {}
+): TokenizerState {
+  return new TokenizerState(name, exclusive);
+}
+
+export function token(
+  pattern: RegExp | string,
+  config?: TokenConfig
+): TokenDefinition {
+  return new TokenDefinition(pattern, config);
+}
+
 export class TokenDefinition extends Combinator<Token> {
   public readonly kind: string;
   public readonly silent: boolean;
   public readonly priority: number;
+  public readonly pushState: TokenizerState | undefined;
+  public readonly popState: TokenizerState | undefined;
+  public readonly requiredState: TokenizerState | undefined;
   public readonly match: (input: string, offset: number) => Token | undefined;
 
-  public constructor(input: TokenConfig) {
+  public constructor(pattern: string | RegExp, config?: TokenConfig) {
     super();
 
-    let config =
-      typeof input === 'object' && 'pattern' in input
-        ? input
-        : { pattern: input };
-
-    this.kind = config.kind ?? String(config.pattern);
-    this.silent = Boolean(config.silent);
-    this.priority = config.priority ?? Infinity;
+    this.kind = config?.kind ?? String(pattern);
+    this.silent = Boolean(config?.silent);
+    this.priority = config?.priority ?? 0xff;
+    this.pushState = config?.pushState;
+    this.popState = config?.popState;
+    this.requiredState = config?.requiredState;
     this.match =
-      typeof config.pattern === 'string'
-        ? this.stringMatcher(this.kind, config.pattern)
-        : this.regexMatcher(this.kind, config.pattern);
+      typeof pattern === 'string'
+        ? this.stringMatcher(this.kind, pattern)
+        : this.regexMatcher(this.kind, pattern);
   }
 
   public children(): Array<Combinator<unknown>> {
     return [];
   }
 
-  public parse(state: State, push: Push, cont: Continuation<Token>): void {
+  public parse(state: ParseState, push: Push, cont: Continuation<Token>): void {
     let { tokens, index } = state;
     let token = tokens[index];
     if (token?.kind === this.kind) {
@@ -72,8 +93,4 @@ export class TokenDefinition extends Combinator<Token> {
       }
     };
   }
-}
-
-export function token(config: TokenConfig): TokenDefinition {
-  return new TokenDefinition(config);
 }

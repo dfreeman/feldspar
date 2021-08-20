@@ -1,14 +1,15 @@
 import { alt, defer, maybe, repeatOneSep, seq, token } from '..';
+import { state } from './token';
 import { tokenize, discoverTokenDefinitions } from './tokenize';
 
 describe('Tokenization', () => {
   let a = token('a');
   let b = token(/b+/);
-  let c = token({ kind: 'C', pattern: 'c' });
-  let d = token({ pattern: 'd', silent: true });
-  let e = token({ kind: 'e', pattern: /ab/, priority: 2 });
-  let f = token({ kind: 'f', pattern: /ab/, priority: 1 });
-  let g = token({ kind: 'g', pattern: /ab/, priority: 3 });
+  let c = token('c', { kind: 'C' });
+  let d = token('d', { silent: true });
+  let e = token(/ab/, { kind: 'e', priority: 2 });
+  let f = token(/ab/, { kind: 'f', priority: 1 });
+  let g = token(/ab/, { kind: 'g', priority: 3 });
 
   test('tokenize', () => {
     let tokens = [f, e, g, a, b, c, d];
@@ -31,5 +32,32 @@ describe('Tokenization', () => {
     );
 
     expect(discoverTokenDefinitions(entry, [d])).toEqual([f, e, g, d, a, b, c]);
+  });
+
+  test('tokenization states', () => {
+    let inc = state('inclusive');
+    let exc = state('exclusive', { exclusive: true });
+
+    let lparen = token('(', { pushState: inc });
+    let rparen = token(')', { popState: inc });
+    let lbrack = token('[', { pushState: exc });
+    let rbrack = token(']', { popState: exc });
+
+    let a = token('a');
+    let bInc = token('b', { kind: 'b-in-inc', requiredState: inc });
+    let bExc = token('b', { kind: 'b-in-exc', requiredState: exc });
+
+    let tokens = [lparen, rparen, lbrack, rbrack, a, bInc, bExc];
+    let tok = (input: string): Array<string> =>
+      tokenize(input, tokens).map((t) => t.kind);
+
+    expect(tok('a')).toEqual(['a']);
+    expect(tok('(a)')).toEqual(['(', 'a', ')']);
+    expect(() => tok('[a]')).toThrow();
+
+    expect(() => tok('b')).toThrow();
+    expect(tok('(b)')).toEqual(['(', 'b-in-inc', ')']);
+    expect(tok('[b]')).toEqual(['[', 'b-in-exc', ']']);
+    expect(tok('(b[b])')).toEqual(['(', 'b-in-inc', '[', 'b-in-exc', ']', ')']);
   });
 });

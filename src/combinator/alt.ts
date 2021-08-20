@@ -1,5 +1,5 @@
 import { Combinator, CombinatorContents, Push } from '../combinator';
-import { Continuation, State } from '../parser/result';
+import { Continuation, ParseState } from '../parser/result';
 
 export const { alt } = class AltCombinator<T> extends Combinator<T> {
   private constructor(private readonly combinators: Array<Combinator<T>>) {
@@ -10,7 +10,7 @@ export const { alt } = class AltCombinator<T> extends Combinator<T> {
     return this.combinators;
   }
 
-  public parse(state: State, push: Push, cont: Continuation<T>): void {
+  public parse(state: ParseState, push: Push, cont: Continuation<T>): void {
     for (let combinator of this.combinators) {
       push(combinator, state, cont);
     }

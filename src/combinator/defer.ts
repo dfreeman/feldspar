@@ -1,5 +1,5 @@
 import { Combinator, Push } from '../combinator';
-import { Continuation, State } from '../parser/result';
+import { Continuation, ParseState } from '../parser/result';
 
 export const { defer } = class DeferredCombinator<T> extends Combinator<T> {
   private inner: Combinator<T> | undefined;
@@ -14,7 +14,7 @@ export const { defer } = class DeferredCombinator<T> extends Combinator<T> {
     return [(this.inner ??= this.reify(this))];
   }
 
-  public parse(state: State, push: Push, cont: Continuation<T>): void {
+  public parse(state: ParseState, push: Push, cont: Continuation<T>): void {
     return (this.inner ??= this.reify(this)).parse(state, push, cont);
   }
 
