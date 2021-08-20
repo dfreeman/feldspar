@@ -21,14 +21,10 @@ export function tokenize(
       }
 
       let token = def.match(current, offset);
-      if (token) {
+      if (token?.content.length) {
         offset += token.content.length;
         if (!def.silent) {
           tokens.push(token);
-        } else if (!token.content.length) {
-          throw new Error(
-            `Silent token ${token.kind} matched a zero-length string; tokenization would never complete.`
-          );
         }
 
         if (def.popState) {
