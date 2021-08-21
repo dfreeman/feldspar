@@ -1,6 +1,6 @@
 import { alt, defer, maybe, repeatOneSep, seq, token } from '..';
 import { state } from './token';
-import { tokenize, discoverTokenDefinitions } from './tokenize';
+import { tokenize, discoverTokenDefinitions, EOF } from './tokenize';
 
 describe('Tokenization', () => {
   let a = token('a');
@@ -19,6 +19,7 @@ describe('Tokenization', () => {
       { kind: 'a', content: 'a', offset: 2 },
       { kind: '/b+/', content: 'bb', offset: 4 },
       { kind: 'C', content: 'c', offset: 6 },
+      { kind: EOF, content: '', offset: 8 },
     ]);
   });
 
@@ -51,13 +52,21 @@ describe('Tokenization', () => {
     let tok = (input: string): Array<string> =>
       tokenize(input, tokens).map((t) => t.kind);
 
-    expect(tok('a')).toEqual(['a']);
-    expect(tok('(a)')).toEqual(['(', 'a', ')']);
+    expect(tok('a')).toEqual(['a', EOF]);
+    expect(tok('(a)')).toEqual(['(', 'a', ')', EOF]);
     expect(() => tok('[a]')).toThrow();
 
     expect(() => tok('b')).toThrow();
-    expect(tok('(b)')).toEqual(['(', 'b-in-inc', ')']);
-    expect(tok('[b]')).toEqual(['[', 'b-in-exc', ']']);
-    expect(tok('(b[b])')).toEqual(['(', 'b-in-inc', '[', 'b-in-exc', ']', ')']);
+    expect(tok('(b)')).toEqual(['(', 'b-in-inc', ')', EOF]);
+    expect(tok('[b]')).toEqual(['[', 'b-in-exc', ']', EOF]);
+    expect(tok('(b[b])')).toEqual([
+      '(',
+      'b-in-inc',
+      '[',
+      'b-in-exc',
+      ']',
+      ')',
+      EOF,
+    ]);
   });
 });
