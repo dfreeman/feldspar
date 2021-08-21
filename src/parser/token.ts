@@ -72,7 +72,7 @@ export class TokenDefinition extends Combinator<Token> {
     if (token?.kind === this.kind) {
       cont(success(token, { tokens, index: index + 1 }));
     } else {
-      cont(failure());
+      cont(failure(this, state));
     }
   }
 

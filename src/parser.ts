@@ -1,7 +1,8 @@
 import { Combinator, Push } from './combinator';
+import { ParseError } from './parser/errors';
 import { Continuation, Result } from './parser/result';
 import { Token, TokenDefinition } from './parser/token';
-import { discoverTokenDefinitions, tokenize } from './parser/tokenize';
+import { discoverTokenDefinitions, EOF, tokenize } from './parser/tokenize';
 
 type TrampolineEntry = {
   pastResults: Set<Result<any>>;
@@ -31,10 +32,22 @@ export class Parser<T = unknown> {
     let values: Array<T> = [];
     let tokens = tokenize(input, this.tokenDefinitions);
     let state = { tokens, index: 0 };
+    let errors = { index: 0, expected: new Set<TokenDefinition>() };
+    let hasSucceeded = false;
 
     this.push(this.entry, state, (result) => {
-      if (result.success && result.state.index === tokens.length) {
+      if (result.success && tokens[result.state.index]?.kind === EOF) {
         values.push(result.value);
+        hasSucceeded = true;
+      } else if (!result.success && !hasSucceeded) {
+        if (result.state.index === errors.index) {
+          errors.expected.add(result.expected);
+        } else if (result.state.index > errors.index) {
+          errors = {
+            index: result.state.index,
+            expected: new Set([result.expected]),
+          };
+        }
       }
     });
 
@@ -42,6 +55,10 @@ export class Parser<T = unknown> {
       this.step(tokens);
       yield* values;
       values = [];
+    }
+
+    if (errors.expected.size && !hasSucceeded) {
+      throw new ParseError(errors.expected, tokens[errors.index]);
     }
 
     return null;

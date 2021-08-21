@@ -2,7 +2,7 @@
 
 This is a toy parser combinator system based off of the Racket GLL parser library described in [this article](https://epsil.github.io/gll/).
 
-It makes no attempt to be particularly fast or robust, and it offers essentially nothing in the way of error reporting, but it will happily handle left recursion and ambiguous grammars, and all rules and resulting parsers are fully typechecked.
+It makes no attempt to be particularly fast or robust, and it offers minimal error reporting and no recovery, but it will happily handle left recursion and ambiguous grammars, and all rules and resulting parsers are fully typechecked.
 
 ## Overview
 

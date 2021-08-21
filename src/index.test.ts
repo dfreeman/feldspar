@@ -1,4 +1,4 @@
-import { seq, alt, defer, Parser, token } from '.';
+import { seq, alt, defer, Parser, token, ParseError } from '.';
 
 describe('Feldspar', () => {
   test('ambiguous structure', () => {
@@ -48,5 +48,34 @@ describe('Feldspar', () => {
       [[2, Op.Add, 3], Op.Add, 4],
       [2, Op.Add, [3, Op.Add, 4]],
     ]);
+  });
+
+  test('errors', () => {
+    let ws = token(/\s+/, { silent: true });
+    let int = token(/\d+/, { kind: 'Int' }).map((tok) => tok.content);
+    let op = alt(token('+'), token('*')).map((tok) => tok.content);
+    let expr = defer<string>((expr) =>
+      alt(
+        seq(expr, op, expr).map((parts) => `(${parts.join(' ')})`),
+        int
+      )
+    );
+
+    let parser = new Parser(expr, [ws]);
+
+    try {
+      parser.parse('22*33 44+55');
+      expect(false).toBeTruthy();
+    } catch (error) {
+      expect(error).toBeInstanceOf(ParseError);
+
+      let parseError = error as ParseError;
+      let expected = [...parseError.expected].map((tok) => tok.kind);
+
+      expect(new Set(expected)).toEqual(new Set(['*', '+']));
+      expect(parseError.found.kind).toEqual('Int');
+      expect(parseError.offset).toEqual(6);
+      expect(parseError.length).toEqual(2);
+    }
   });
 });

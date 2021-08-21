@@ -1,5 +1,8 @@
 import { Combinator } from '../combinator';
+import { TokenizerError } from './errors';
 import { Token, TokenDefinition, TokenizerState } from './token';
+
+export const EOF = '<EOF>';
 
 export function tokenize(
   input: string,
@@ -46,8 +49,11 @@ export function tokenize(
         continue advance;
       }
     }
-    throw new Error('Unrecognized token at offset ' + offset);
+    throw new TokenizerError(offset);
   }
+
+  tokens.push({ kind: EOF, offset, content: '' });
+
   return tokens;
 }
 

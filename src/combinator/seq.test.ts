@@ -1,5 +1,6 @@
 import { expectTypeOf } from 'expect-type';
 import { Parser, seq, token } from '..';
+import { ParseError, TokenizerError } from '../parser/errors';
 import { Token } from '../parser/token';
 
 describe('Combinator | seq', () => {
@@ -7,7 +8,7 @@ describe('Combinator | seq', () => {
     let parser = new Parser(seq());
 
     expectTypeOf(parser).toEqualTypeOf<Parser<[]>>();
-    expect(() => parser.parse('hi')).toThrow(/unrecognized token/i);
+    expect(() => parser.parse('hi')).toThrow(TokenizerError);
     expect(parser.parse('')).toEqual([]);
   });
 
@@ -16,7 +17,7 @@ describe('Combinator | seq', () => {
 
     expectTypeOf(parser).toEqualTypeOf<Parser<[number]>>();
     expect(parser.parse('hi')).toEqual([123]);
-    expect(() => parser.parse('boom')).toThrow(/unrecognized token/i);
+    expect(() => parser.parse('boom')).toThrow(TokenizerError);
   });
 
   test('multiple alternatives', () => {
@@ -47,7 +48,7 @@ describe('Combinator | seq', () => {
       'the bc thing',
     ]);
 
-    expect(parser.parse('aaa')).toEqual(null);
-    expect(parser.parse('bc')).toEqual(null);
+    expect(() => parser.parse('aaa')).toThrow(ParseError);
+    expect(() => parser.parse('bc')).toThrow(ParseError);
   });
 });

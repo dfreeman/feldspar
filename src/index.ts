@@ -1,5 +1,6 @@
 export * from './parser';
 export * from './parser/token';
+export * from './parser/errors';
 export * from './combinator';
 export * from './combinator/alt';
 export * from './combinator/defer';
