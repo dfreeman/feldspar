@@ -72,10 +72,10 @@ export class TokenDefinition extends Combinator<Token> {
   }
 
   public parse(state: ParseState, push: Push, cont: Continuation<Token>): void {
-    let { tokens, index } = state;
+    let { tokens, source, index } = state;
     let token = tokens[index];
     if (token?.kind === this.kind) {
-      cont(success(token, { tokens, index: index + 1 }));
+      cont(success(token, { tokens, source, index: index + 1 }));
     } else {
       cont(failure(this, state));
     }

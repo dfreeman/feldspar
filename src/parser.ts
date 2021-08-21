@@ -37,13 +37,13 @@ export class Parser<T = unknown> {
     return this.parseAll(input).next().value;
   }
 
-  public *parseAll(input: string): Generator<T, null, undefined> {
+  public *parseAll(source: string): Generator<T, null, undefined> {
     this.stack = [];
     this.storage = new Map();
 
     let values: Array<T> = [];
-    let { tokens } = this.tokenize(input);
-    let state = { tokens, index: 0 };
+    let { tokens } = this.tokenize(source);
+    let state = { tokens, source, index: 0 };
     let errors = { index: 0, expected: new Set<TokenDefinition>() };
     let hasSucceeded = false;
 
@@ -64,7 +64,7 @@ export class Parser<T = unknown> {
     });
 
     while (this.hasNext()) {
-      this.step(tokens);
+      this.step(tokens, source);
       yield* values;
       values = [];
     }
@@ -98,14 +98,14 @@ export class Parser<T = unknown> {
     return Boolean(this.stack.length);
   }
 
-  private step(tokens: ReadonlyArray<Token>): void {
+  private step(tokens: ReadonlyArray<Token>, source: string): void {
     let next = this.stack.pop();
     if (!next) return;
 
     let { combinator, index } = next;
     let { pastResults, continuations } = this.findEntry(combinator, index);
 
-    combinator.parse({ tokens, index }, this.push, (result) => {
+    combinator.parse({ tokens, index, source }, this.push, (result) => {
       if (pastResults.has(result)) return;
 
       pastResults.add(result);

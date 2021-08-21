@@ -1,7 +1,11 @@
 import { Token, TokenDefinition } from './token';
 
 export type Continuation<T = unknown> = (arg: Result<T>) => void;
-export type ParseState = { tokens: ReadonlyArray<Token>; index: number };
+export type ParseState = {
+  tokens: ReadonlyArray<Token>;
+  source: string;
+  index: number;
+};
 
 export type Result<T> =
   | Readonly<{ success: true; value: T; state: ParseState }>
