@@ -14,7 +14,7 @@ describe('Tokenization', () => {
   test('tokenize', () => {
     let tokens = [f, e, g, a, b, c, d];
 
-    expect(tokenize('abadbbcd', tokens)).toEqual([
+    expect(tokenize('abadbbcd', tokens).tokens).toEqual([
       { kind: 'f', content: 'ab', offset: 0 },
       { kind: 'a', content: 'a', offset: 2 },
       { kind: '/b+/', content: 'bb', offset: 4 },
@@ -50,7 +50,7 @@ describe('Tokenization', () => {
 
     let tokens = [lparen, rparen, lbrack, rbrack, a, bInc, bExc];
     let tok = (input: string): Array<string> =>
-      tokenize(input, tokens).map((t) => t.kind);
+      tokenize(input, tokens).tokens.map((t) => t.kind);
 
     expect(tok('a')).toEqual(['a', EOF]);
     expect(tok('(a)')).toEqual(['(', 'a', ')', EOF]);

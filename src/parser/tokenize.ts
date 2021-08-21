@@ -1,13 +1,18 @@
 import { Combinator } from '../combinator';
 import { TokenizerError } from './errors';
-import { Token, TokenDefinition, TokenizerState } from './token';
+import {
+  Token,
+  TokenDefinition,
+  TokenizeResult,
+  TokenizerState,
+} from './token';
 
 export const EOF = '<EOF>';
 
 export function tokenize(
   input: string,
   tokenDefs: ReadonlyArray<TokenDefinition>
-): Array<Token> {
+): TokenizeResult {
   let stateStack: Array<TokenizerState> = [];
   let tokens: Array<Token> = [];
   let offset = 0;
@@ -54,7 +59,7 @@ export function tokenize(
 
   tokens.push({ kind: EOF, offset, content: '' });
 
-  return tokens;
+  return { tokens, state: stateStack };
 }
 
 export function discoverTokenDefinitions(
