@@ -11,6 +11,11 @@ export type TokenConfig = {
   popState?: TokenizerState;
 };
 
+export type TokenizeResult = {
+  tokens: ReadonlyArray<Token>;
+  state: ReadonlyArray<TokenizerState>;
+};
+
 export interface Token {
   readonly kind: string;
   readonly offset: number;
