@@ -11,9 +11,10 @@ export const EOF = '<EOF>';
 
 export function tokenize(
   input: string,
-  tokenDefs: ReadonlyArray<TokenDefinition>
+  tokenDefs: ReadonlyArray<TokenDefinition>,
+  state: Array<TokenizerState> = []
 ): TokenizeResult {
-  let stateStack: Array<TokenizerState> = [];
+  let stateStack = state.slice();
   let tokens: Array<Token> = [];
   let offset = 0;
   advance: while (offset < input.length) {

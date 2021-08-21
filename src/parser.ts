@@ -1,8 +1,13 @@
 import { Combinator, Push } from './combinator';
 import { ParseError } from './parser/errors';
 import { Continuation, Result } from './parser/result';
-import { Token, TokenDefinition, TokenizeResult } from './parser/token';
 import { discoverTokenDefinitions, EOF, tokenize } from './parser/tokenize';
+import {
+  Token,
+  TokenDefinition,
+  TokenizeResult,
+  TokenizerState,
+} from './parser/token';
 
 type TrampolineEntry = {
   pastResults: Set<Result<any>>;
@@ -21,8 +26,11 @@ export class Parser<T = unknown> {
     this.tokenDefinitions = discoverTokenDefinitions(entry, extraTokens);
   }
 
-  public tokenize(input: string): TokenizeResult {
-    return tokenize(input, this.tokenDefinitions);
+  public tokenize(
+    input: string,
+    state: Array<TokenizerState> = []
+  ): TokenizeResult {
+    return tokenize(input, this.tokenDefinitions, state);
   }
 
   public parse(input: string): T | null {

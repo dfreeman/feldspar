@@ -38,6 +38,15 @@ describe('Parser', () => {
         { kind: EOF, content: '', offset: 6 },
       ],
     });
+
+    expect(parser.tokenize('a<a', [inner])).toEqual({
+      state: [],
+      tokens: [
+        { kind: 'aInner', content: 'a', offset: 0 },
+        { kind: 'aOuter', content: 'a', offset: 2 },
+        { kind: EOF, content: '', offset: 3 },
+      ],
+    });
   });
 
   test('errors', () => {
