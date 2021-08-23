@@ -6,6 +6,12 @@ export class TokenizerError extends Error {
   }
 }
 
+export class NoResultError extends Error {
+  public constructor() {
+    super('Parse terminated without ever emitting a result or an error');
+  }
+}
+
 export class ParseError extends Error {
   public readonly expected: Set<TokenDefinition>;
   public readonly found: Token;

@@ -1,5 +1,5 @@
 import { Combinator, Push } from './combinator';
-import { ParseError } from './parser/errors';
+import { NoResultError, ParseError } from './parser/errors';
 import { Continuation, Result } from './parser/result';
 import { discoverTokenDefinitions, EOF, tokenize } from './parser/tokenize';
 import {
@@ -33,8 +33,12 @@ export class Parser<T = unknown> {
     return tokenize(input, this.tokenDefinitions, state);
   }
 
-  public parse(input: string): T | null {
-    return this.parseAll(input).next().value;
+  public parse(input: string): T {
+    let result = this.parseAll(input).next();
+    if (result.done) {
+      throw new NoResultError();
+    }
+    return result.value;
   }
 
   public *parseAll(source: string): Generator<T, null, undefined> {

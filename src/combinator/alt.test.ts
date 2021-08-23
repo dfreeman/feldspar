@@ -1,6 +1,6 @@
 import { expectTypeOf } from 'expect-type';
 import { Parser, alt, token } from '..';
-import { TokenizerError } from '../parser/errors';
+import { NoResultError, TokenizerError } from '../parser/errors';
 import { Token } from '../parser/token';
 
 describe('Combinator | alt', () => {
@@ -9,7 +9,7 @@ describe('Combinator | alt', () => {
 
     expectTypeOf(parser).toEqualTypeOf<Parser<never>>();
     expect(() => parser.parse('hi')).toThrow(TokenizerError);
-    expect(parser.parse('')).toEqual(null);
+    expect(() => parser.parse('')).toThrow(NoResultError);
   });
 
   test('single alternative', () => {
